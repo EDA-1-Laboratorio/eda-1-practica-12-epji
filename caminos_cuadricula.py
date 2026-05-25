@@ -85,6 +85,12 @@ def caminos_recursivo(m: int, n: int) -> int:
     # PASO 2 – Caso recursivo.
     #   Aplica la fórmula:  caminos(m, n) = caminos(m-1, n) + caminos(m, n-1)
     #   Es una sola línea de código.
+    # PASO 1 – Casos base.
+    if m == 1 or n == 1:
+        return 1
+
+    # PASO 2 – Caso recursivo.
+    return caminos_recursivo(m - 1, n) + caminos_recursivo(m, n - 1)
 
     pass  # TODO
 
@@ -109,7 +115,22 @@ def caminos_memo(m: int, n: int, memo: dict = None) -> int:
             4. Calcula recursivamente, guarda en memo[(m, n)], devuelve.
     """
     # Sigue los cuatro pasos descritos arriba.
-
+    # 1. Inicializa memo si es None.
+    if memo is None:
+        memo = {}
+        
+    # 2. Casos base.
+    if m == 1 or n == 1:
+        return 1
+        
+    # 3. Revisa caché.
+    if (m, n) in memo:
+        return memo[(m, n)]
+        
+    # 4. Calcula recursivamente, guarda en memo y devuelve.
+    memo[(m, n)] = caminos_memo(m - 1, n, memo) + caminos_memo(m, n - 1, memo)
+    return memo[(m, n)]
+    
     pass  # TODO
 
 
@@ -152,7 +173,24 @@ def caminos_bottom_up(m: int, n: int) -> tuple:
     # PASO 4 – Doble bucle de llenado (empieza en i=1, j=1).
 
     # PASO 5 – Devuelve (tabla[m-1][n-1], tabla).
+      # PASO 1 – Crea la tabla de m filas × n columnas llena de ceros.
+    tabla = [[0] * n for _ in range(m)]
 
+    # PASO 2 – Inicializa la primera fila.
+    for j in range(n): 
+        tabla[0][j] = 1
+
+    # PASO 3 – Inicializa la primera columna.
+    for i in range(m): 
+        tabla[i][0] = 1
+
+    # PASO 4 – Doble bucle de llenado (empieza en i=1, j=1).
+    for i in range(1, m):
+        for j in range(1, n):
+            tabla[i][j] = tabla[i - 1][j] + tabla[i][j - 1]
+
+    # PASO 5 – Devuelve (tabla[m-1][n-1], tabla).
+    return tabla[m - 1][n - 1], tabla
     pass  # TODO  ← cuando implementes, cambia el return a (tabla[m-1][n-1], tabla)
 
 
@@ -182,7 +220,17 @@ def imprimir_tabla(tabla: list, titulo: str = "Tabla DP") -> None:
     # PASO 2 – Imprime el título.
 
     # PASO 3 – Recorre las filas e imprime cada valor con rjust(ancho).
+    
+     # PASO 1 – Encuentra el valor máximo en toda la tabla y define el ancho.
+    max_val = max(max(fila) for fila in tabla)
+    ancho = len(str(max_val)) + 1
 
+    # PASO 2 – Imprime el título.
+    print(f"{titulo}:")
+
+    # PASO 3 – Recorre las filas e imprime cada valor con rjust(ancho).
+    for fila in tabla:
+        print("".join(str(val).rjust(ancho) for val in fila))
     pass  # TODO
 
 
@@ -248,7 +296,37 @@ def caminos_con_obstaculos(grid: list) -> int:
     #   Aplica la MODIFICACIÓN 2 descrita arriba.
 
     # PASO 6 – Retorna tabla[m-1][n-1].
+     # PASO 1 – Verifica si el inicio o el destino están bloqueados.
+    m, n = len(grid), len(grid[0])
+    if grid[0][0] == 1 or grid[m - 1][n - 1] == 1: 
+        return 0
 
+    # PASO 2 – Crea la tabla de ceros.
+    tabla = [[0] * n for _ in range(m)]
+
+    # PASO 3 – Inicializa la primera fila considerando obstáculos.
+    # Si encontramos un 1, el break detiene el llenado dejando el resto en 0.
+    for j in range(n):
+        if grid[0][j] == 1:
+            break
+        tabla[0][j] = 1
+
+    # PASO 4 – Inicializa la primera columna considerando obstáculos.
+    for i in range(m):
+        if grid[i][0] == 1:
+            break
+        tabla[i][0] = 1
+
+    # PASO 5 – Llena el interior (doble bucle desde i=1, j=1).
+    for i in range(1, m):
+        for j in range(1, n):
+            if grid[i][j] == 1:
+                tabla[i][j] = 0  # Celda bloqueada, no aporta caminos
+            else:
+                tabla[i][j] = tabla[i - 1][j] + tabla[i][j - 1]
+
+    # PASO 6 – Retorna tabla[m-1][n-1].
+    return tabla[m - 1][n - 1]
     pass  # TODO
 
 

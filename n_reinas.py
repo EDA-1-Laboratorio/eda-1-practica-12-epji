@@ -82,14 +82,17 @@ def es_valida(tablero: list) -> bool:
     n = len(tablero)
 
     # PASO 1 – Doble bucle sobre todos los pares (i, j) con i < j.
-
+    n = len(tablero)
+    for i in range(n):
+        for j in range(i + 1, n):
     # PASO 2 – Verifica las dos condiciones de conflicto.
+            if tablero[i] == tablero[j] or abs(tablero[i] - tablero[j]) == abs(i - j):
     #   Condición columna:  tablero[i] == tablero[j]
     #   Condición diagonal: abs(tablero[i] - tablero[j]) == abs(i - j)
     #   Si alguna se cumple, retorna False inmediatamente.
-
+                return False
     # PASO 3 – Si el bucle termina sin conflictos, retorna True.
-
+    return True
     pass  # TODO
 
 
@@ -136,6 +139,10 @@ def es_segura(tablero: list, fila: int, col: int) -> bool:
         garantiza que solo hay una reina por fila.
     """
     # Itera sobre las filas anteriores (0 a fila-1) y verifica conflictos.
+    for i in range(fila):
+        if tablero[i] == col or abs(tablero[i] - col) == abs(i - fila):
+            return False
+    return True
 
     pass  # TODO
 
@@ -161,8 +168,7 @@ def es_segura(tablero: list, fila: int, col: int) -> bool:
 #   La PODA ocurre cuando es_segura retorna False: no exploramos esa
 #   rama ni ninguna de sus subramas. Esto reduce enormemente el espacio.
 
-def resolver_n_reinas(n: int, fila: int = 0,
-                      tablero: list = None) -> list | None:
+def resolver_n_reinas(n: int, fila: int = 0, tablero: list = None) -> list | None:
     """
     Encuentra la primera solución al problema de N reinas usando backtracking.
 
@@ -203,6 +209,18 @@ def resolver_n_reinas(n: int, fila: int = 0,
     #   Para cada col, verifica es_segura → coloca → recursa → backtrack.
 
     # PASO 4 – Si ninguna columna funcionó, retorna None.
+    if tablero is None:
+        tablero = [-1] * n
+    if fila == n:
+        return tablero.copy()
+    for col in range(n):
+        if es_segura(tablero, fila, col):
+            tablero[fila] = col
+            resultado = resolver_n_reinas(n, fila + 1, tablero)
+            if resultado is not None:
+                return resultado
+            tablero[fila] = -1
+    return None
 
     pass  # TODO
 
@@ -230,9 +248,11 @@ def imprimir_tablero(tablero: list, titulo: str = "Tablero") -> None:
     """
     n = len(tablero)
     print(f"\n{titulo}:")
+    for i in range(n):
+        print(" ".join("Q" if tablero[i] == j else "." for j in range(n)))
     # Para cada fila, construye una cadena con 'Q' en la columna correspondiente.
     # Usa " ".join(...) para separar con espacios.
-
+    
     pass  # TODO
 
 
@@ -245,8 +265,7 @@ def imprimir_tablero(tablero: list, titulo: str = "Tablero") -> None:
 #   - NUNCA retornamos al encontrar una solución; seguimos explorando.
 #   - Siempre hacemos backtrack (tablero[fila] = -1) al terminar cada rama.
 
-def contar_soluciones(n: int, fila: int = 0,
-                      tablero: list = None) -> int:
+def contar_soluciones(n: int, fila: int = 0, tablero: list = None) -> int:
     """
     Cuenta todas las soluciones al problema de N reinas.
 
@@ -279,7 +298,17 @@ def contar_soluciones(n: int, fila: int = 0,
     # PASO 3 – Caso recursivo: itera columnas, acumula count.
 
     # PASO 4 – return count
-
+    if tablero is None:
+        tablero = [-1] * n
+    if fila == n:
+        return 1
+    count = 0
+    for col in range(n):
+        if es_segura(tablero, fila, col):
+            tablero[fila] = col
+            count += contar_soluciones(n, fila + 1, tablero)
+            tablero[fila] = -1
+    return count
     pass  # TODO
 
 
